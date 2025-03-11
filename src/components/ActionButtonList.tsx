@@ -265,15 +265,19 @@ export const ActionButtonList = ({
 
   const eth_xmtp_send_message = async () => {
     if (xmtpClient) {
-      await xmtpClient.conversations.listAll();
+      await xmtpClient.conversations.syncAll();
       await xmtpClient.conversations.sendMessage('Hello, This is our first message', undefined, '0x7c589d7209a07981381251a264ea2053075821a3');
     }
   }
 
   const eth_list_xmtp_messages = async () => {
+    console.log("🚀 ~ consteth_list_xmtp_messages= ~ xmtpClient:", xmtpClient)
+
     if (xmtpClient) {
-      const messages = await xmtpClient.conversations.listAll();
-      console.log("🚀 ~ listMessages ~ messages:", messages);
+      const dms = await xmtpClient.conversations.getDms();
+      console.log("🚀 ~ listMessages ~ messages:", dms);
+      if (dms)
+        console.log('Messages => ', await xmtpClient.conversations.getMessages(dms[0]))
     }
   }
   

@@ -7,7 +7,7 @@ class XMTPConversations {
     this.client = client;
   }
 
-  async listAll(): Promise<void> {
+  async syncAll(): Promise<void> {
     await this.client?.conversations.syncAll();
   }
 
@@ -42,9 +42,21 @@ class XMTPConversations {
     return conversation.members();
   }
 
-  async addGroupMembers(conversation: Conversation, addresses: string[]): Promise<void> {
-    return conversation?.addMembers(addresses);
+  async getAll(): Promise<Conversation[] | undefined> {
+    return this.client?.conversations.list();
   }
+
+  async getDms(): Promise<Conversation[] | undefined> {
+    return this.client?.conversations.listDms();
+  }
+
+  async getGroups(): Promise<Conversation[] | undefined> {
+    return this.client?.conversations.listGroups();
+  }
+
+  /*async addGroupMembers(conversation: Conversation, addresses: string[]): Promise<void> {
+    return conversation.(addresses);
+  }*/
 
   // Conversation can be a group or a DM
   async sendMessage(message: string, conversation?: Conversation, address?: string): Promise<void> {
