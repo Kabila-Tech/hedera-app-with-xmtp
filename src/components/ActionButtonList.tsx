@@ -77,6 +77,13 @@ interface ActionButtonListProps {
   sendNodeAddresses: (nodes: string[]) => void;
 }
 
+interface Conversation {
+  id: string;
+  messages: string[];
+}
+
+let xmtpClient: XMTPClient | undefined = undefined;
+
 export const ActionButtonList = ({
   sendHash,
   sendTxId,
@@ -92,10 +99,11 @@ export const ActionButtonList = ({
   const [signedEthTx, setSignedEthTx] = useState<string>();
   const [message2, setMessage2] = useState<string>("");
   const [encriptionKey, setEncriptionKey] = useState<string>("");
+  const [conversations, setConversations] = useState<Conversation[]>([]);
 
   const { walletProvider } = useAppKitProvider(activeChain ?? hederaNamespace);
 
-  let xmtpClient: XMTPClient | undefined = undefined;
+
 
   const handleDisconnect = async () => {
     try {
@@ -309,20 +317,33 @@ export const ActionButtonList = ({
   };
 
   const eth_list_xmtp_messages = async () => {
-    const client = await getXMTPClient();
-    console.log("🚀 ~ consteth_list_xmtp_messages= ~ xmtpClient:", client);
+    await getXMTPClient();
+    console.log("🚀 ~ consteth_list_xmtp_messages= ~ xmtpClient:", xmtpClient);
 
-    if (client) {
-      const dms = await client.conversations.getAll();
-      console.log("🚀 ~ listMessages ~ messages:", dms);
-      if (dms) {
-        for (const dm of dms) {
-          console.log("🚀 ~ consteth_list_xmtp_messages= ~ dm:", dm);
-          console.log('Messages => ', await client.conversations.getMessages(dm));
-        }
+    if (xmtpClient) {
+      const convos = await xmtpClient.conversations.getAll();
+      console.log("🚀 ~ listMessages ~ convos:", convos);
+      if (convos) {
+        const convosWithMessages = await Promise.all(
+          convos.map(async (c) => {
+            const messages = await xmtpClient!.conversations.getMessages(c);
+            console.log("convo", c)
+            console.log("🚀 ~ convos.map ~ messages:", messages)
+            return {
+              id: c.id,
+              messages: messages.map((msg) => { 
+                if (typeof msg.content == "string") {
+                  return msg.content 
+                }
+                return "No processed content"
+              }),
+            };
+          })
+        );
+        setConversations(convosWithMessages);
       }
     }
-  }
+  };
   
   /*
   const eth_createXmtpClient_2 = async () => {
@@ -496,6 +517,22 @@ export const ActionButtonList = ({
                 <button onClick={() => eth_xmtp_send_message(message2)}>XMTP Send Message</button>
                 <button onClick={eth_list_xmtp_messages}>XMTP Get messages</button>
               </div>
+              <div>
+                <h2>Conversations</h2>
+                {conversations.map((conversation) => (
+                  <div key={conversation.id} className="conversation">
+                    <h3>Conversation ID: {conversation.id}</h3>
+                    <div className="messages">
+                      {conversation.messages.map((message, index) => (
+                        <div key={index} className="message">
+                          {typeof message === "string" ? message : JSON.stringify(message)}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
             </>
           )}
           {activeChain == hederaNamespace && (
