@@ -33,6 +33,7 @@ import {
 } from "@hashgraph/hedera-wallet-connect";
 import { hederaNamespace } from "../config";
 import XMTPClient from "../xmtp/XMTPClient";
+import { Conversation } from "@xmtp/browser-sdk";
 // import { universalHederaAdapter } from "../config";
 
 // Example receiver addresses
@@ -77,7 +78,7 @@ interface ActionButtonListProps {
   sendNodeAddresses: (nodes: string[]) => void;
 }
 
-interface Conversation {
+interface Conversation2 {
   id: string;
   messages: string[];
 }
@@ -99,7 +100,8 @@ export const ActionButtonList = ({
   const [signedEthTx, setSignedEthTx] = useState<string>();
   const [message2, setMessage2] = useState<string>("");
   const [encriptionKey, setEncriptionKey] = useState<string>("");
-  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [conversations, setConversations] = useState<Conversation2[]>([]);
+  const [groupConversation, setGroupConversations] = useState<Conversation>();
 
   const { walletProvider } = useAppKitProvider(activeChain ?? hederaNamespace);
 
@@ -139,6 +141,53 @@ export const ActionButtonList = ({
     }
 
     console.log("You need Create a XMPT CLIENT")
+  };
+
+  const xmpt_create_group = async () => {
+    await getXMTPClient();
+    console.log("🚀 ~ consteth_list_xmtp_messages= ~ xmtpClient:", xmtpClient);
+
+    if (xmtpClient) {
+      console.log("Creating group");
+      const newGroupConversation: Conversation = await xmtpClient.conversations.createGroup(['0x3bD4a856b5A90732d378B109b607354d4E7fE178', '0x7c589d7209a07981381251a264ea2053075821a3']);
+      console.log("🚀 ~ createGroup ~ newGroupConversation:", newGroupConversation)
+      setGroupConversations(newGroupConversation)
+    }
+  }
+
+
+  const xmpt_get_groups = async () => {
+    await getXMTPClient();
+    console.log("🚀 ~ consteth_list_xmtp_messages= ~ xmtpClient:", xmtpClient);
+
+    if (xmtpClient) {
+      console.log("getting group");
+      const convos = await xmtpClient.conversations.getGroups()
+      console.log("🚀 ~ constxmpt_get_groups= ~ convos:", convos)
+      if (convos && convos[0]) {
+        setGroupConversations(convos[0])
+      }
+    }
+  }
+
+  const xmpt_get_members = async () => {
+    await getXMTPClient();
+    console.log("🚀 ~ consteth_list_xmtp_messages= ~ xmtpClient:", xmtpClient);
+
+    if (xmtpClient && groupConversation) {
+      console.log("Creating group");
+      const members = await xmtpClient.conversations.getGroupMembers(groupConversation)
+      console.log("🚀 ~ constxmpt_get_members= ~ members:", members)
+    }
+  }
+
+  const xmtp_send_message_to_group = async () => {
+    await getXMTPClient();
+    if (xmtpClient && groupConversation) {
+      const message = "hello world " + new Date().toISOString();
+      await xmtpClient.conversations.syncAll();
+      await xmtpClient.conversations.sendMessage(message, groupConversation);
+    }
   };
 
   const hedera_getNodeAddresses = async () => {
@@ -515,6 +564,10 @@ export const ActionButtonList = ({
                   placeholder="Enter your message"
                 />
                 <button onClick={() => eth_xmtp_send_message(message2)}>XMTP Send Message</button>
+                <button onClick={xmpt_create_group}>XMTP Create group</button>
+                <button onClick={xmpt_get_groups}>XMTP GET group</button>
+                <button onClick={xmpt_get_members}>XMTP GET group members</button>
+                <button onClick={xmtp_send_message_to_group}>XMTP send message to group</button>
                 <button onClick={eth_list_xmtp_messages}>XMTP Get messages</button>
               </div>
               <div>
