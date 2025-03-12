@@ -66,7 +66,7 @@ const message = {
   contents: "Hello, Bob!",
 };
 
-let xmtpClient: XMTPClient | undefined = undefined;
+
 
 interface ActionButtonListProps {
   sendHash: (hash: string) => void;
@@ -94,6 +94,9 @@ export const ActionButtonList = ({
   const [encriptionKey, setEncriptionKey] = useState<string>("");
 
   const { walletProvider } = useAppKitProvider(activeChain ?? hederaNamespace);
+
+  let xmtpClient: XMTPClient | undefined = undefined;
+
   const handleDisconnect = async () => {
     try {
       await disconnect();
@@ -102,11 +105,32 @@ export const ActionButtonList = ({
     }
   };
 
+
   // --- HIP-820 ---
 
   const getwalletProvider = () => {
     if (!walletProvider) throw Error("user is disconnected");
     return walletProvider as HederaWalletConnectProvider;
+  };
+
+  const getXMTPClient = async () => {
+    if (xmtpClient) return xmtpClient;
+    console.log("RECOVERING XMPT CLIENT WITH SOTRED KEY")
+    const walletProvider = getwalletProvider();
+    if (!address) throw Error("user is disconnected");
+    const provider = new BrowserProvider(walletProvider, chainId);
+    const signerJsonRPC = new JsonRpcSigner(provider, address);
+    
+    const storedKey = localStorage.getItem("installationKey");
+    if (storedKey) {
+      setEncriptionKey(storedKey);
+      xmtpClient = new XMTPClient();
+      await xmtpClient.buildInstallation(signerJsonRPC, storedKey);
+      console.log('Key -> ', xmtpClient.getInstallationKey());
+      return xmtpClient;
+    }
+
+    console.log("You need Create a XMPT CLIENT")
   };
 
   const hedera_getNodeAddresses = async () => {
@@ -240,14 +264,15 @@ export const ActionButtonList = ({
 
 
 
-      //0.0.4422825
-    //0x2274ebff15443305e90fd5099e6a7d590c82f8985d4efc043cd5c51e32edee5a
+      // accountId: 0.0.4422825
+      // pk: 0x2274ebff15443305e90fd5099e6a7d590c82f8985d4efc043cd5c51e32edee5a
       // inboxId : 0c5a3dbcbb3987d01b105d2be285053ce3526464f82804c31c940b461a7cbb31
       // EVM: 0x3bD4a856b5A90732d378B109b607354d4E7fE178
 
-     //0.0.1800
-     //0xfe808e80a50ef654aeb1b3b3f4c0059f1c614a9973885e3d71bce9faf363135b
+     // accountid: 0.0.1800
+     // pk: 0xfe808e80a50ef654aeb1b3b3f4c0059f1c614a9973885e3d71bce9faf363135b
      // EVM: 0x7c589d7209a07981381251a264ea2053075821a3
+
      //await xmtpClient.conversations.newGroup([], { name: 'This is another group' })
     // ecc3b35fa0948c82bd57a1db78732030
 /*
@@ -256,27 +281,23 @@ export const ActionButtonList = ({
 */
 
   const eth_create_xmtp_client = async () => {
+    if (xmtpClient) return;
     const walletProvider = getwalletProvider();
     if (!address) throw Error("user is disconnected");
     const provider = new BrowserProvider(walletProvider, chainId);
     const signerJsonRPC = new JsonRpcSigner(provider, address);
     xmtpClient = new XMTPClient();
     await xmtpClient.createInstallation(signerJsonRPC);
-    console.log('Key -> ', xmtpClient.getInstallationKey())
-  }
-
-  const eth_build_xmtp_client = async (encriptionKey: string) => {
-    console.log("🚀 ~ consteth_build_xmtp_client= ~ encriptionKey:", encriptionKey)
-    const walletProvider = getwalletProvider();
-    if (!address) throw Error("user is disconnected");
-    const provider = new BrowserProvider(walletProvider, chainId);
-    const signerJsonRPC = new JsonRpcSigner(provider, address);
-    xmtpClient = new XMTPClient();
-    await xmtpClient.buildInstallation(signerJsonRPC, encriptionKey);
-    console.log('Key -> ', xmtpClient.getInstallationKey())
+    const key = await xmtpClient.getInstallationKey();
+    if (key) {
+      localStorage.setItem("installationKey", key);
+      setEncriptionKey(key);
+    }
+    console.log('Key -> ', key);
   }
 
   const eth_xmtp_send_message = async (message: string) => {
+    await getXMTPClient();
     if (xmtpClient) {
       const myAddress = xmtpClient.getClient()?.accountAddress;
       const address = myAddress == "0x7C589D7209a07981381251a264EA2053075821a3" ? "0x3bD4a856b5A90732d378B109b607354d4E7fE178" : "0x7c589d7209a07981381251a264ea2053075821a3";
@@ -288,15 +309,16 @@ export const ActionButtonList = ({
   };
 
   const eth_list_xmtp_messages = async () => {
-    console.log("🚀 ~ consteth_list_xmtp_messages= ~ xmtpClient:", xmtpClient)
+    const client = await getXMTPClient();
+    console.log("🚀 ~ consteth_list_xmtp_messages= ~ xmtpClient:", client);
 
-    if (xmtpClient) {
-      const dms = await xmtpClient.conversations.getAll();
+    if (client) {
+      const dms = await client.conversations.getAll();
       console.log("🚀 ~ listMessages ~ messages:", dms);
       if (dms) {
         for (const dm of dms) {
-          console.log("🚀 ~ consteth_list_xmtp_messages= ~ dm:", dm)
-          console.log('Messages => ', await xmtpClient.conversations.getMessages(dm))
+          console.log("🚀 ~ consteth_list_xmtp_messages= ~ dm:", dm);
+          console.log('Messages => ', await client.conversations.getMessages(dm));
         }
       }
     }
@@ -463,14 +485,8 @@ export const ActionButtonList = ({
                   eth_sendTransaction
                 </button>
                 <button onClick={eth_signTypedData}>eth_signTypedData</button>
+                <div> installation key: {encriptionKey} </div>
                 <button onClick={eth_create_xmtp_client}>Create client</button>
-                <input
-                  type="text"
-                  value={encriptionKey}
-                  onChange={(e) => setEncriptionKey(e.target.value)}
-                  placeholder="Enter your encriptionkey"
-                />
-                <button onClick={() => eth_build_xmtp_client(encriptionKey)}>Build client</button>
                 <input
                   type="text"
                   value={message2}
