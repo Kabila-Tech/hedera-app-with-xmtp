@@ -40,6 +40,7 @@ class XMTPClient {
 
   async buildInstallation(signer: JsonRpcSigner, encryptionKey: string): Promise<void> {
     const recoveredKey = base64ToUint8Array(encryptionKey);
+    this.installationKey = encryptionKey;
     await this.createClient(signer, recoveredKey);
   }
 

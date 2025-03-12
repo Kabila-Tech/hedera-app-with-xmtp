@@ -60,11 +60,25 @@ class XMTPConversations {
 
   // Conversation can be a group or a DM
   async sendMessage(message: string, conversation?: Conversation, address?: string): Promise<void> {
-    if (address) {
-      conversation = await this.client?.conversations.newDm(address);
+    try {
+      if (address) {
+        const newConversation = await this.client?.conversations.newDm(address);
+        if (!newConversation) {
+          throw new Error(`Failed to create a conversation with address: ${address}`);
+        }
+        conversation = newConversation;
+      }
+  
+      if (!conversation) {
+        throw new Error("No valid conversation provided.");
+      }
+  
+      await conversation.send(message);
+    } catch (error) {
+      console.error("Error sending message:", error);
     }
-    conversation?.send(message);
   }
+  
 }
 
 export default XMTPConversations;

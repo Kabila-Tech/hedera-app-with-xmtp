@@ -90,6 +90,8 @@ export const ActionButtonList = ({
   const { activeChain } = useAppKitState();
   const [signedHederaTx, setSignedHederaTx] = useState<HederaTransaction>();
   const [signedEthTx, setSignedEthTx] = useState<string>();
+  const [message2, setMessage2] = useState<string>("");
+  const [encriptionKey, setEncriptionKey] = useState<string>("");
 
   const { walletProvider } = useAppKitProvider(activeChain ?? hederaNamespace);
   const handleDisconnect = async () => {
@@ -245,7 +247,7 @@ export const ActionButtonList = ({
 
      //0.0.1800
      //0xfe808e80a50ef654aeb1b3b3f4c0059f1c614a9973885e3d71bce9faf363135b
-     // EVM: 
+     // EVM: 0x7c589d7209a07981381251a264ea2053075821a3
      //await xmtpClient.conversations.newGroup([], { name: 'This is another group' })
     // ecc3b35fa0948c82bd57a1db78732030
 /*
@@ -263,21 +265,40 @@ export const ActionButtonList = ({
     console.log('Key -> ', xmtpClient.getInstallationKey())
   }
 
-  const eth_xmtp_send_message = async () => {
-    if (xmtpClient) {
-      await xmtpClient.conversations.syncAll();
-      await xmtpClient.conversations.sendMessage('Hello, This is our first message', undefined, '0x7c589d7209a07981381251a264ea2053075821a3');
-    }
+  const eth_build_xmtp_client = async (encriptionKey: string) => {
+    console.log("🚀 ~ consteth_build_xmtp_client= ~ encriptionKey:", encriptionKey)
+    const walletProvider = getwalletProvider();
+    if (!address) throw Error("user is disconnected");
+    const provider = new BrowserProvider(walletProvider, chainId);
+    const signerJsonRPC = new JsonRpcSigner(provider, address);
+    xmtpClient = new XMTPClient();
+    await xmtpClient.buildInstallation(signerJsonRPC, encriptionKey);
+    console.log('Key -> ', xmtpClient.getInstallationKey())
   }
+
+  const eth_xmtp_send_message = async (message: string) => {
+    if (xmtpClient) {
+      const myAddress = xmtpClient.getClient()?.accountAddress;
+      const address = myAddress == "0x7C589D7209a07981381251a264EA2053075821a3" ? "0x3bD4a856b5A90732d378B109b607354d4E7fE178" : "0x7c589d7209a07981381251a264ea2053075821a3";
+      console.log("🚀 ~ consteth_xmtp_send_message= ~ myAddress:", myAddress);
+      console.log("🚀 ~ consteth_xmtp_send_message= ~ address:", address);
+      await xmtpClient.conversations.syncAll();
+      await xmtpClient.conversations.sendMessage(message, undefined, address);
+    }
+  };
 
   const eth_list_xmtp_messages = async () => {
     console.log("🚀 ~ consteth_list_xmtp_messages= ~ xmtpClient:", xmtpClient)
 
     if (xmtpClient) {
-      const dms = await xmtpClient.conversations.getDms();
+      const dms = await xmtpClient.conversations.getAll();
       console.log("🚀 ~ listMessages ~ messages:", dms);
-      if (dms)
-        console.log('Messages => ', await xmtpClient.conversations.getMessages(dms[0]))
+      if (dms) {
+        for (const dm of dms) {
+          console.log("🚀 ~ consteth_list_xmtp_messages= ~ dm:", dm)
+          console.log('Messages => ', await xmtpClient.conversations.getMessages(dm))
+        }
+      }
     }
   }
   
@@ -442,8 +463,21 @@ export const ActionButtonList = ({
                   eth_sendTransaction
                 </button>
                 <button onClick={eth_signTypedData}>eth_signTypedData</button>
-                <button onClick={eth_create_xmtp_client}>Create client 0.0.4422825</button>
-                <button onClick={eth_xmtp_send_message}>XMTP Send Message</button>
+                <button onClick={eth_create_xmtp_client}>Create client</button>
+                <input
+                  type="text"
+                  value={encriptionKey}
+                  onChange={(e) => setEncriptionKey(e.target.value)}
+                  placeholder="Enter your encriptionkey"
+                />
+                <button onClick={() => eth_build_xmtp_client(encriptionKey)}>Build client</button>
+                <input
+                  type="text"
+                  value={message2}
+                  onChange={(e) => setMessage2(e.target.value)}
+                  placeholder="Enter your message"
+                />
+                <button onClick={() => eth_xmtp_send_message(message2)}>XMTP Send Message</button>
                 <button onClick={eth_list_xmtp_messages}>XMTP Get messages</button>
               </div>
             </>

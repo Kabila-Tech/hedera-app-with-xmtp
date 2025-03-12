@@ -10,7 +10,15 @@ cp .env.local.example .env.local
 
 2. Install dependcies and run example
 
+
+** with yarn **
 ```sh
 yarn install
 yarn dev
+```
+
+** with npm **
+```sh
+npm install --force
+npm run dev
 ```
