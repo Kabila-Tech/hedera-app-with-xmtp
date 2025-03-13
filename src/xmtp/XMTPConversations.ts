@@ -99,6 +99,21 @@ class XMTPConversations {
       console.error('Error sending message:', error);
     }
   }
+
+  async sendMessageByConversationId(message: string, conversationId: string): Promise<void> {
+    console.log('🚀 ~ XMTPConversations ~ sendMessageByConversationId ~ conversationId:', conversationId);
+    try {
+      const conversation = await this.client?.conversations.getConversationById(conversationId);
+
+      if (!conversation) {
+        throw new Error('No valid conversation provided.');
+      }
+
+      await conversation.send(message);
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
+  }
 }
 
 export default XMTPConversations;

@@ -33,7 +33,7 @@ import {
 } from "@hashgraph/hedera-wallet-connect";
 import { hederaNamespace } from "../config";
 import XMTPClient from "../xmtp/XMTPClient";
-import { Conversation, Identifier } from "@xmtp/browser-sdk";
+import { Conversation } from "@xmtp/browser-sdk";
 // import { universalHederaAdapter } from "../config";
 
 // Example receiver addresses
@@ -102,6 +102,7 @@ export const ActionButtonList = ({
   const [encriptionKey, setEncriptionKey] = useState<string>("");
   const [conversations, setConversations] = useState<Conversation2[]>([]);
   const [groupConversation, setGroupConversations] = useState<Conversation>();
+  const [conversationId, setConversationId] = useState<string>("");
 
   const { walletProvider } = useAppKitProvider(activeChain ?? hederaNamespace);
 
@@ -369,6 +370,16 @@ export const ActionButtonList = ({
     }
   };
 
+  const eth_xmtp_send_message_to_conversations = async (message: string, conversationId: string) => {
+    await getXMTPClient();
+    if (xmtpClient) {
+      if (conversationId) {
+        await xmtpClient.conversations.syncAll();
+        await xmtpClient.conversations.sendMessageByConversationId(message, conversationId);
+      }
+    }
+  };
+
   const eth_list_xmtp_messages = async () => {
     await getXMTPClient();
     console.log("🚀 ~ consteth_list_xmtp_messages= ~ xmtpClient:", xmtpClient);
@@ -568,6 +579,13 @@ export const ActionButtonList = ({
                   placeholder="Enter your message"
                 />
                 <button onClick={() => eth_xmtp_send_message(message2)}>XMTP Send Message</button>
+                <input
+                  type="text"
+                  value={conversationId}
+                  onChange={(e) => setConversationId(e.target.value)}
+                  placeholder="Enter your conversationId"
+                />
+                <button onClick={() => eth_xmtp_send_message_to_conversations(message2, conversationId)}>XMPT send message to conversations</button>
                 <button onClick={xmpt_create_group}>XMTP Create group</button>
                 <button onClick={xmpt_get_groups}>XMTP GET group</button>
                 <button onClick={xmpt_get_members}>XMTP GET group members</button>
