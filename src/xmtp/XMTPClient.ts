@@ -20,12 +20,14 @@ export function base64ToUint8Array(base64: string): Uint8Array {
 
 class XMTPClient {
   private client: Client | undefined = undefined;
+  private signer: Signer | undefined = undefined;
   private installationKey: string | undefined = undefined;
   private inboxId: string | undefined = undefined;
   public conversations: XMTPConversations;
 
   constructor() {
     this.client = undefined;
+    this.signer = undefined;
     this.installationKey = undefined;
     this.inboxId = undefined;
     this.conversations = new XMTPConversations();
@@ -68,6 +70,7 @@ class XMTPClient {
       this.client = undefined;
       throw new Error('XMTP Client not created');
     }
+    this.signer = xmtpSigner;
     this.inboxId = this.client.inboxId;
     this.conversations = new XMTPConversations(this.client);
     console.log('XMTP Client Created:', this.client);
@@ -75,6 +78,10 @@ class XMTPClient {
 
   getClient(): Client | undefined {
     return this.client;
+  }
+
+  getSigner(): Signer | undefined {
+    return this.signer;
   }
 
   async getInboxId(): Promise<string | undefined> {

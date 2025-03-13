@@ -103,6 +103,7 @@ export const ActionButtonList = ({
   const [conversations, setConversations] = useState<Conversation2[]>([]);
   const [groupConversation, setGroupConversations] = useState<Conversation>();
   const [conversationId, setConversationId] = useState<string>("");
+  const [inboxId, setInboxId] = useState<string>("");
 
   const { walletProvider } = useAppKitProvider(activeChain ?? hederaNamespace);
 
@@ -380,11 +381,23 @@ export const ActionButtonList = ({
     }
   };
 
+  const eth_xmtp_send_message_to_inbox = async (message: string, inboxId: string) => {
+    await getXMTPClient();
+    if (xmtpClient) {
+      if (inboxId) {
+        await xmtpClient.conversations.syncAll();
+        await xmtpClient.conversations.sendMessageToInboxId(message, inboxId);
+      }
+    }
+  };
+
   const eth_list_xmtp_messages = async () => {
     await getXMTPClient();
     console.log("🚀 ~ consteth_list_xmtp_messages= ~ xmtpClient:", xmtpClient);
 
     if (xmtpClient) {
+      const myInboxId = await xmtpClient.getInboxId();
+      console.log("🚀 ~ consteth_list_xmtp_messages= ~ myInboxId:", myInboxId)
       const convos = await xmtpClient.conversations.getAll();
       console.log("🚀 ~ listMessages ~ convos:", convos);
       if (convos) {
@@ -586,6 +599,13 @@ export const ActionButtonList = ({
                   placeholder="Enter your conversationId"
                 />
                 <button onClick={() => eth_xmtp_send_message_to_conversations(message2, conversationId)}>XMPT send message to conversations</button>
+                <input
+                  type="text"
+                  value={inboxId}
+                  onChange={(e) => setInboxId(e.target.value)}
+                  placeholder="Enter your inboxId"
+                />
+                <button onClick={() => eth_xmtp_send_message_to_inbox(message2, inboxId)}>XMPT send message to inbox</button>
                 <button onClick={xmpt_create_group}>XMTP Create group</button>
                 <button onClick={xmpt_get_groups}>XMTP GET group</button>
                 <button onClick={xmpt_get_members}>XMTP GET group members</button>

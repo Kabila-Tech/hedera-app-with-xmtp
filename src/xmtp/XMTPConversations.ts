@@ -1,4 +1,4 @@
-import { Client, Conversation, DecodedMessage, SafeGroupMember, Identifier } from '@xmtp/browser-sdk';
+import { Client, Conversation, DecodedMessage, SafeGroupMember, Identifier, Dm } from '@xmtp/browser-sdk';
 
 class XMTPConversations {
   private client: Client | undefined = undefined;
@@ -110,6 +110,22 @@ class XMTPConversations {
       }
 
       await conversation.send(message);
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
+  }
+
+  async sendMessageToInboxId(message: string, inboxId: string): Promise<void> {
+    console.log('🚀 ~ XMTPConversations ~ sendMessageByToInboxId ~ inboxId:', inboxId);
+    try {
+      const dm: Dm | undefined = await this.client?.conversations.newDm(inboxId);
+
+      if (!dm) {
+        throw new Error('No valid dm provided.');
+      }
+
+      const result = await dm.send(message);
+      console.log('🚀 ~ XMTPConversations ~ sendMessageByToInboxId ~ result:', result);
     } catch (error) {
       console.error('Error sending message:', error);
     }
