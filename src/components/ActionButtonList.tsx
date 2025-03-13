@@ -33,7 +33,7 @@ import {
 } from "@hashgraph/hedera-wallet-connect";
 import { hederaNamespace } from "../config";
 import XMTPClient from "../xmtp/XMTPClient";
-import { Conversation } from "@xmtp/browser-sdk";
+import { Conversation, Identifier } from "@xmtp/browser-sdk";
 // import { universalHederaAdapter } from "../config";
 
 // Example receiver addresses
@@ -356,12 +356,16 @@ export const ActionButtonList = ({
   const eth_xmtp_send_message = async (message: string) => {
     await getXMTPClient();
     if (xmtpClient) {
-      const myAddress = xmtpClient.getClient()?.accountAddress;
-      const address = myAddress == "0x7C589D7209a07981381251a264EA2053075821a3" ? "0x3bD4a856b5A90732d378B109b607354d4E7fE178" : "0x7c589d7209a07981381251a264ea2053075821a3";
-      console.log("🚀 ~ consteth_xmtp_send_message= ~ myAddress:", myAddress);
-      console.log("🚀 ~ consteth_xmtp_send_message= ~ address:", address);
-      await xmtpClient.conversations.syncAll();
-      await xmtpClient.conversations.sendMessage(message, undefined, address);
+      const identifier =  await (xmtpClient.getClient()?.accountIdentifier());
+      if (identifier) {
+        console.log("🚀 ~ consteth_xmtp_send_message= ~ identifier:", identifier)
+        const myAddress = identifier.identifier
+        const address = myAddress == "0x7C589D7209a07981381251a264EA2053075821a3" ? "0x3bD4a856b5A90732d378B109b607354d4E7fE178" : "0x7c589d7209a07981381251a264ea2053075821a3";
+        console.log("🚀 ~ consteth_xmtp_send_message= ~ myAddress:", myAddress);
+        console.log("🚀 ~ consteth_xmtp_send_message= ~ address:", address);
+        await xmtpClient.conversations.syncAll();
+        await xmtpClient.conversations.sendMessage(message, undefined, address);
+      }
     }
   };
 

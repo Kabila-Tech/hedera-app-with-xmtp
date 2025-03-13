@@ -21,7 +21,7 @@
     "@walletconnect/universal-provider": "2.18.0",
     "@walletconnect/utils": "2.18.0",
     "@walletconnect/web3wallet": "^1.16.1",
-    "@xmtp/browser-sdk": "0.0.23",
+    "@xmtp/browser-sdk": "1.0.0-rc1",
     "buffer": "^6.0.3",
     "ethers": "^6.13.4",
     "react": "^18.3.1",

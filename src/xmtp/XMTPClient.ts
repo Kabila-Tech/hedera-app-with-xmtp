@@ -46,12 +46,14 @@ class XMTPClient {
 
   private async createSigner(signer: JsonRpcSigner): Promise<Signer> {
     return {
-      getAddress: () => signer.getAddress(),
+      getIdentifier: async () => {
+        return { identifier: await signer.getAddress(), identifierKind: 'Ethereum' };
+      },
       signMessage: async (message: string) => {
         const signMessage = await signer.signMessage(message);
         return hexToBytes(signMessage as Hex);
       },
-      walletType: 'EOA'
+      type: 'EOA'
     };
   }
 

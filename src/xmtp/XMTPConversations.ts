@@ -1,4 +1,4 @@
-import { Client, Conversation, DecodedMessage, SafeGroupMember } from '@xmtp/browser-sdk';
+import { Client, Conversation, DecodedMessage, SafeGroupMember, Identifier } from '@xmtp/browser-sdk';
 
 class XMTPConversations {
   private client: Client | undefined = undefined;
@@ -12,7 +12,15 @@ class XMTPConversations {
   }
 
   async createGroup(addresses: string[]): Promise<Conversation> {
-    const groupCreated: Conversation | undefined = await this.client?.conversations.newGroup(addresses);
+    const identifiers: Identifier[] = addresses.map((address) => {
+      return {
+        identifier: address,
+        identifierKind: 'Ethereum'
+      };
+    });
+    const groupCreated: Conversation | undefined = await this.client?.conversations.newGroupWithIdentifiers(
+      identifiers
+    );
     if (!groupCreated) {
       throw new Error('Group not created');
     }
@@ -20,7 +28,16 @@ class XMTPConversations {
   }
 
   async createDirectConversation(addresses: string[]): Promise<Conversation> {
-    const groupCreated: Conversation | undefined = await this.client?.conversations.newGroup(addresses);
+    const identifiers: Identifier[] = addresses.map((address) => {
+      return {
+        identifier: address,
+        identifierKind: 'Ethereum'
+      };
+    });
+
+    const groupCreated: Conversation | undefined = await this.client?.conversations.newGroupWithIdentifiers(
+      identifiers
+    );
     if (!groupCreated) {
       throw new Error('Group not created');
     }
@@ -62,23 +79,26 @@ class XMTPConversations {
   async sendMessage(message: string, conversation?: Conversation, address?: string): Promise<void> {
     try {
       if (address) {
-        const newConversation = await this.client?.conversations.newDm(address);
+        const identifier: Identifier = {
+          identifier: address,
+          identifierKind: 'Ethereum'
+        };
+        const newConversation = await this.client?.conversations.newDmWithIdentifier(identifier);
         if (!newConversation) {
           throw new Error(`Failed to create a conversation with address: ${address}`);
         }
         conversation = newConversation;
       }
-  
+
       if (!conversation) {
-        throw new Error("No valid conversation provided.");
+        throw new Error('No valid conversation provided.');
       }
-  
+
       await conversation.send(message);
     } catch (error) {
-      console.error("Error sending message:", error);
+      console.error('Error sending message:', error);
     }
   }
-  
 }
 
 export default XMTPConversations;

@@ -1737,16 +1737,16 @@
     "@walletconnect/window-getters" "^1.0.1"
     tslib "1.14.1"
 
-"@xmtp/browser-sdk@0.0.23":
-  version "0.0.23"
-  resolved "https://registry.npmjs.org/@xmtp/browser-sdk/-/browser-sdk-0.0.23.tgz"
-  integrity sha512-me4Ov633OdkyJj3LezH42juPkxIyodRUaYtJpZzdlr6fSKG4TTxW+O47uiS9HT0ZGVk+mp0thNPVAnHCP/gTvg==
+"@xmtp/browser-sdk@1.0.0-rc1":
+  version "1.0.0-rc1"
+  resolved "https://registry.npmjs.org/@xmtp/browser-sdk/-/browser-sdk-1.0.0-rc1.tgz"
+  integrity sha512-98dtoQuXGlgYvEbOo8r+M2o8fYaSB3FptIHPRnRTO8P14BWN90ClyXt/lXXJJYU6GhCjOk9ltt5CDBxb3AAonw==
   dependencies:
     "@xmtp/content-type-group-updated" "^2.0.0"
     "@xmtp/content-type-primitives" "^2.0.0"
     "@xmtp/content-type-text" "^2.0.0"
     "@xmtp/proto" "^3.72.3"
-    "@xmtp/wasm-bindings" "^0.0.21"
+    "@xmtp/wasm-bindings" "^1.0.0-rc4"
     uuid "^11.0.3"
 
 "@xmtp/content-type-group-updated@^2.0.0":
@@ -1781,10 +1781,10 @@
     rxjs "^7.8.0"
     undici "^5.8.1"
 
-"@xmtp/wasm-bindings@^0.0.21":
-  version "0.0.21"
-  resolved "https://registry.npmjs.org/@xmtp/wasm-bindings/-/wasm-bindings-0.0.21.tgz"
-  integrity sha512-zxQgmouKvxuYM+yCwZYoL1Bz3a+occ0OArcRrm87ZzMe3irQJHPaHoZeg0264iq1vOj7I9vJdGN3zVDKzW0h2g==
+"@xmtp/wasm-bindings@^1.0.0-rc4":
+  version "1.0.0-rc4"
+  resolved "https://registry.npmjs.org/@xmtp/wasm-bindings/-/wasm-bindings-1.0.0-rc4.tgz"
+  integrity sha512-NbRLjpp7gh+hotQg+Uyf90R0cdTjCpGb1iMksebtkV7zh/+Z5Lxj+Avi0wUFFFDbHlyjMmcT20bpMYa3GMiIgA==
 
 abitype@^1.0.6, abitype@1.0.8:
   version "1.0.8"
